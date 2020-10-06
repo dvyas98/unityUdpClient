@@ -26,7 +26,7 @@ public class NetworkMan : MonoBehaviour
     private void SetCube()
     {
         myAddress = "init";
-        cubeX = 1; cubeY = 1; cubeZ = 1;
+        cubeX = 1; cubeY = 1; cubeZ = 1; ///Lets Set the cube to a fix position.
     }
 
 
@@ -46,7 +46,7 @@ public class NetworkMan : MonoBehaviour
 
         InvokeRepeating("HeartBeat", 1, 1);
 
-        InvokeRepeating("SendPosition", 1, 0.03f);
+        InvokeRepeating("SendPosition", 1, 0.01f);  //Need to send all the position things at a fast pace so 0.01 repeatrate.
 
     }
 
@@ -88,7 +88,7 @@ public class NetworkMan : MonoBehaviour
     }
 
     [Serializable]
-    public class ListOfdroppedPlayerList
+    public class ListOfdroppedPlayerList  //To delete the players
     {
         public string address;
     }
@@ -130,7 +130,7 @@ public class NetworkMan : MonoBehaviour
         string returnData = Encoding.ASCII.GetString(message);
 
         Debug.Log("Got this: " + returnData);
-        defMessage = "Got this: " + returnData;
+        defMessage = "Got this: " + returnData;   //saving it in a variable so that easily can be used later.
 
 
         latestMessage= JsonUtility.FromJson<Message>(returnData);
@@ -139,25 +139,25 @@ public class NetworkMan : MonoBehaviour
             switch (latestMessage.cmd)
             {
                 case commands.NEW_CLIENT:
-                    Debug.Log("New Player");
-                    Debug.Log(defMessage);
+                    Debug.Log("New Player"); //Lets LOG
+                    Debug.Log(defMessage);  //Used what we made in a variable.
                     NewPlayer p = JsonUtility.FromJson<NewPlayer>(returnData);
                     if (myAddress == "init")
                     {
-                        myAddress = p.player.id;
+                        myAddress = p.player.id;  //Assigning the id to my new spanned Player.
                     }
                     newPlayerList.Add(p.player.id); //Spawn Player with this ID.
                     break;
 
                 case commands.UPDATE:
-                    ActiveGameState = JsonUtility.FromJson<GameState>(returnData);
+                    ActiveGameState = JsonUtility.FromJson<GameState>(returnData);  
                     break;
 
                 case commands.PLAYER_DISCONNECTED:
                     ListOfdroppedPlayerList drop = JsonUtility.FromJson<ListOfdroppedPlayerList>(returnData);
                     Debug.Log("Player Gone.");
                     Debug.Log(defMessage);
-                    droppedPlayerList.Add(drop.address);
+                    droppedPlayerList.Add(drop.address);  //Adding to the drop list so that in next update can be deleted.
                     //Drop the player
                     break;
                 case commands.LIST_OF_PLAYERS:
@@ -166,7 +166,7 @@ public class NetworkMan : MonoBehaviour
                     {
                         if (gamePlayers.players[i].id != myAddress)
                         {
-                            newPlayerList.Add(gamePlayers.players[i].id);
+                            newPlayerList.Add(gamePlayers.players[i].id);  //Adding to the add list so that in next update can be added.
                         }
                     }
                     break;
@@ -188,9 +188,9 @@ public class NetworkMan : MonoBehaviour
         //Spawn the Cube
         for (int i = 0; i < newPlayerList.Count; i++)
         {
-            GameObject NewCube = Instantiate(playerGO, Vector3.zero, Quaternion.identity);
+            GameObject NewCube = Instantiate(playerGO, Vector3.zero, Quaternion.identity);  // Getting the game object which is a cube player prefab.
             NewCube.GetComponent<Cube>().Address = newPlayerList[i];
-            currentPlayerList.Add(NewCube.GetComponent<Cube>());
+            currentPlayerList.Add(NewCube.GetComponent<Cube>());  //Adding to the list.
         }
         newPlayerList.Clear();
         newPlayerList.TrimExcess();
@@ -205,10 +205,10 @@ public class NetworkMan : MonoBehaviour
                 for (int j = 0; j < currentPlayerList.Count; j++)
                 {
                     if (currentPlayerList[j].Address == ActiveGameState.players[i].id)
-                    {
-                        float x = ActiveGameState.players[i].position.x;
-                        float y = ActiveGameState.players[i].position.y;
-                        float z = ActiveGameState.players[i].position.z;
+                    { 
+                        float x = ActiveGameState.players[i].position.x;   //
+                        float y = ActiveGameState.players[i].position.y;  // Lets set the positions.
+                        float z = ActiveGameState.players[i].position.z;  //
                         currentPlayerList[j].transform.position = new Vector3(x, y, z);
                     }
                 }
@@ -222,7 +222,7 @@ public class NetworkMan : MonoBehaviour
         {
             if (currentPlayerList[i].Address == address)
             {
-                currentPlayerList[i].gameObject.SendMessage("deleteCube");
+                currentPlayerList[i].gameObject.SendMessage("deleteCube");  
             }
         }
     }
@@ -231,7 +231,7 @@ public class NetworkMan : MonoBehaviour
     {
         for (int i = 0; i < droppedPlayerList.Count; i++)
         {
-            deletePlayers(droppedPlayerList[i]);
+            deletePlayers(droppedPlayerList[i]);        // was it in the drop list? Lets Delete that.
         }
         droppedPlayerList.Clear();
         droppedPlayerList.TrimExcess();
@@ -243,7 +243,7 @@ public class NetworkMan : MonoBehaviour
     }
     void SendPosition()
     {
-        Position cube = new Position();
+        Position cube = new Position();   // Getting the cube from my Cube Script and setting its positon according to my cube set function.
         cube.position.x = cubeX;
         cube.position.y = cubeY;
         cube.position.z = cubeZ;
@@ -252,7 +252,7 @@ public class NetworkMan : MonoBehaviour
 
     }
     void Update(){
-        SpawnPlayers();
+        SpawnPlayers();  
         UpdatePlayers();
         deleteDropped();
     }
